@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.CusbodMapper">
+
+	<select id="getNextnum" resultType="int">
+		<![CDATA[
+			SELECT IFNULL(MAX(csnum), 0) + 1 AS nextnum 
+			FROM cusbod
+			where ctype = #{ctype}
+		]]>
+	</select>
+	
+	<select id="getList"  resultType="cusbodVO">
+		<![CDATA[
+			select * from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+				left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+				left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+				left outer join cususr d on (a.cusid = d.cusid)
+				order by a.cdate desc, a.crerf desc, a.cresq asc
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    </where>
+	    <![CDATA[ 
+	    	order by x.crerf desc, x.cresq asc
+			LIMIT #{startRow}, #{amount}
+	    ]]>
+	</select>
+	
+	<select id="getListType"  resultType="cusbodVO">
+		<![CDATA[
+         	select * from (
+            	select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+	    		order by a.cdate desc, a.crerf desc, a.cresq asc
+			) x
+       	]]>
+		<where>
+			<if test="type == '' ">
+      			x.ctype = #{ctype}
+			</if>
+          	<if test="type == 'cname'.toString()">
+             	x.cname LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+          	</if>
+          	<if test="type == 'csbjt'.toString()">
+             	x.csbjt LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+          	</if>
+          	<if test="type == 'email'.toString()">
+             	x.ccont LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+          	</if>
+       </where>
+       <![CDATA[
+       		order by x.crerf desc, x.cresq asc
+         	LIMIT #{startRow}, #{amount}
+       ]]>
+   </select>
+	
+	<select id="getEmpathList"  resultType="cusbodVO">
+		<![CDATA[
+			select * from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+				order by b.recom desc, a.crerf desc, a.cresq asc
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    </where>
+	    <![CDATA[
+			LIMIT #{startRow}, #{amount}
+	    ]]>
+	</select>
+	
+	<select id="getListCount" resultType="int">
+  		<![CDATA[
+			select count(*) from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    </where>
+  	</select>
+  	
+  	<select id="getListTypeCount" resultType="int">
+  		<![CDATA[
+			select count(*) from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == ''">
+	    		x.ctype = #{ctype}
+	    	</if>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%') and x.ctype = #{ctype}
+	    	</if>
+	    </where>
+  	</select>
+  	
+  	<select id="getEmpathListCount" resultType="int">
+  		<![CDATA[
+			select count(*) from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, DATE_FORMAT(a.cdate , '%Y-%m-%d') as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    </where>
+  	</select>
+  	
+  	<update id="updateCresqPlusOne">
+		<![CDATA[
+			Update cusbod SET
+			cresq = cresq + 1
+			where crerf = #{crerf}
+			AND cresq > #{cresq} 
+		]]>
+	</update>
+	
+	<select id="selectCusbodAndAttache"  resultType="cusbodVO">
+		<![CDATA[
+			select * from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, a.cdate as cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		 concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname, ifnull(e.cnt, 0) as cnt
+            	from cusbod a
+            	left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+            	left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+            	left outer join cususr d on (a.cusid = d.cusid)
+            	left outer join (
+            		select csnum, ctype, count(*) as cnt
+            		from csrepl
+            		group by csnum, ctype
+            	) e on (a.csnum = e.csnum and a.ctype = e.ctype)
+				where a.csnum = #{num} and a.ctype = 'I'
+			) x
+	    ]]>
+	</select>
+	
+	<select id="getApiList"  resultType="cusbodVO">
+		<![CDATA[
+			select * from (
+				select a.csnum, a.ctype, a.cusid, a.csbjt, a.ccont, a.crdcn, a.cdate, a.ctmid, a.crerf,
+            	a.crelv, a.cresq, IFNULL(b.recom,0) as recom, 
+            	case when c.uuid is null then 
+            		substring(left(substring_index(substring_index(ccont, 'src="', -1),'<', 1), 4), 2) else c.uuid end as uuid,
+            		c.uploadpath, 
+            	case when c.filename is null then 
+            		concat('<img style="width:50px" src="/img/',substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2), '">') else c.filename end as filename, 
+            	case when c.filetype is null then 
+            		substring(substring_index(substring_index(ccont, 'img' , -1),'"', 1), 2) else c.filetype end as filetype, 
+            	d.cname
+            	from cusbod a
+				left outer join (
+            		select csnum, sum(recom) as recom
+            		from crecom
+            		group by csnum
+            	) b on (a.csnum = b.csnum)
+				left outer join attach c on (a.csnum = c.bno and a.cusid = c.cusid and a.ctype = c.ctype)
+				left outer join cususr d on (a.cusid = d.cusid)
+				order by a.cdate desc, a.crerf desc, a.cresq asc
+			) x
+	    ]]>
+	    <where>
+	    	<if test="type == 'cname'.toString()">
+	    		x.cname LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'csbjt'.toString()">
+	    		x.csbjt LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		x.ccont LIKE CONCAT('%', #{keyword}, '%')
+	    	</if>
+	    </where>
+	    <![CDATA[ 
+	    	order by x.crerf desc, x.cresq asc
+			LIMIT #{startRow}, #{amount}
+	    ]]>
+	</select>
+</mapper>

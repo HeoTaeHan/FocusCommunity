@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.example.mapper.CususrMapper">
+  	<select id="countAdmin" resultType="int">
+  		<![CDATA[
+			SELECT COUNT(*) from Cususr
+	    ]]>
+	    <where>
+	    	<if test="type == ''">
+	    		cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'cusid'.toString()">
+	    		cusid LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'cname'.toString()">
+	    		cname LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		email LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    </where>
+  	</select>
+  	
+  	<select id="getCususrPageWhereOption" resultType="cususrVO">
+		<![CDATA[
+			SELECT *
+			FROM cususr
+	    ]]>
+	    <where>
+	    	<if test="type == ''">
+	    		cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'cusid'.toString()">
+	    		cusid LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'cname'.toString()">
+	    		cname LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    	<if test="type == 'email'.toString()">
+	    		email LIKE CONCAT('%', #{keyword}, '%') and cusid != 'admin'
+	    	</if>
+	    </where>
+	    <![CDATA[
+			LIMIT #{startRow}, #{amount}
+	    ]]>
+	</select>
+  </mapper>
